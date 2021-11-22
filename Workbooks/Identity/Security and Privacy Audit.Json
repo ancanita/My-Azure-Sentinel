@@ -1,0 +1,2723 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# Security & Privacy Audit"
+      },
+      "name": "WorkbookTitle"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "1e2b3246-fe4e-4d39-b265-7a42a4ae46c1",
+            "version": "KqlParameterItem/1.0",
+            "name": "DefaultSubscription_Internal",
+            "type": 1,
+            "isRequired": true,
+            "query": "where type =~ 'microsoft.operationalinsights/workspaces'\r\n| take 1\r\n| project subscriptionId",
+            "crossComponentResources": [
+              "value::selected"
+            ],
+            "isHiddenWhenLocked": true,
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources"
+          },
+          {
+            "id": "99cc0623-1cf2-42ee-ae97-0e1321843c9d",
+            "version": "KqlParameterItem/1.0",
+            "name": "Subscriptions",
+            "type": 6,
+            "isRequired": true,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "query": "summarize by subscriptionId\r\n| project value = strcat(\"/subscriptions/\", subscriptionId), label = subscriptionId, selected = iff(subscriptionId =~ '{DefaultSubscription_Internal}', true, false)",
+            "crossComponentResources": [
+              "value::selected"
+            ],
+            "typeSettings": {
+              "additionalResourceOptions": []
+            },
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources"
+          },
+          {
+            "id": "e249244e-b556-4ecb-aae0-36843bc5a5a7",
+            "version": "KqlParameterItem/1.0",
+            "name": "Workspace",
+            "type": 5,
+            "isRequired": true,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "query": "where type =~ 'microsoft.operationalinsights/workspaces'\r\n| project id, selected = iff(id =~ todynamic('{DefaultSubscription_Internal}').ws, true, false), custId= properties.customerId",
+            "crossComponentResources": [
+              "{Subscriptions}"
+            ],
+            "value": [
+              "value::1"
+            ],
+            "typeSettings": {
+              "additionalResourceOptions": [
+                "value::1"
+              ],
+              "showDefault": false
+            },
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources"
+          },
+          {
+            "id": "5e8549d6-22aa-47e0-a84b-bf1848cd44cc",
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "type": 4,
+            "isRequired": true,
+            "value": {
+              "durationMs": 604800000
+            },
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 300000
+                },
+                {
+                  "durationMs": 900000
+                },
+                {
+                  "durationMs": 1800000
+                },
+                {
+                  "durationMs": 3600000
+                },
+                {
+                  "durationMs": 14400000
+                },
+                {
+                  "durationMs": 43200000
+                },
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 172800000
+                },
+                {
+                  "durationMs": 259200000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 1209600000
+                },
+                {
+                  "durationMs": 2419200000
+                },
+                {
+                  "durationMs": 2592000000
+                },
+                {
+                  "durationMs": 5184000000
+                },
+                {
+                  "durationMs": 7776000000
+                }
+              ],
+              "allowCustom": true
+            }
+          },
+          {
+            "id": "03a767ef-0516-43f2-84ab-00f7d525fd68",
+            "version": "KqlParameterItem/1.0",
+            "name": "Servers",
+            "type": 2,
+            "isRequired": true,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "query": "SecurityEvent\r\n| distinct SourceComputerId, Computer\r\n| project Computer\r\n| order by Computer desc",
+            "crossComponentResources": [
+              "{Workspace}"
+            ],
+            "value": [
+              "value::all"
+            ],
+            "typeSettings": {
+              "additionalResourceOptions": [
+                "value::all"
+              ],
+              "showDefault": false
+            },
+            "timeContext": {
+              "durationMs": 7776000000
+            },
+            "timeContextFromParameter": "TimeRange",
+            "queryType": 0,
+            "resourceType": "microsoft.operationalinsights/workspaces"
+          },
+          {
+            "id": "18662d91-db8b-4c93-a600-665f96adab2f",
+            "version": "KqlParameterItem/1.0",
+            "name": "Help",
+            "label": "Show Help",
+            "type": 10,
+            "isRequired": true,
+            "typeSettings": {
+              "additionalResourceOptions": []
+            },
+            "jsonData": "[\r\n  { \"value\": \"Yes\", \"label\": \"Yes\"},\r\n  { \"value\": \"No\", \"label\": \"No\", \"selected\":true },\r\n  { \"value\": \"ChangeLog\", \"label\": \"Change Log\"}\r\n]",
+            "value": "Yes"
+          }
+        ],
+        "style": "pills",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "parameters - 1"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": ">**Author(s):**\r\n>- [Antonio Canitano](mailto:antonio.canitano@microsoft.com)\r\n>- [Bruno Gabrielli](mailto:bruno.gabrielli@microsoft.com)\r\n>- [Antonio Di Lorenzo](mailto:antonio.dilorenzo@microsoft.com)\r\n>\r\n>**Version 1.6**\r\n>2021-02-17\r\n>- Added SQL Audit group with tiles\r\n>- Added tiles about:\r\n>\t- List of common failing usernames\r\n>\t- Failed users that logged on succesfully\r\n>\t- Count of logon failures by Source IpAddress\r\n>\t- Failing user details for the selected IpAddress\r\n>\r\n>**Version 1.5**\r\n>2021-02-05\r\n>- Modified by Bruno Gabrielli to add File Audit tiles, more parameters, more detailed info about group type, group scope, distribution group group management operators\r\n>\r\n>**Version 1.4**\r\n>2020-12-15\r\n>- Modified by Antonio Canitano to add queries and charts grouped by type.\r\n>\r\n>**Version 1.3**\r\n>2020-09-29\r\n>- Modified by Antonio Di Lorenzo to add the ability to pin and open query in Log Query to all views. Added \"remove this\" note to this versions history.\r\n>\r\n>**Version 1.2**\r\n>2020-02-14\r\n>- Modified by Antonio Canitano to add a list of queries at the end of the wb\r\nof the workbook.\r\n>\r\n\r\n>**Version 1.2**\r\n>2020-05-13\r\n>- Modified by Bruno Gabrielli to fix an issue with the log cleared tile.\r\n>\r\n>**Version 1.1**\r\n>2020-02-06\r\n>- Modified by Bruno Gabrielli to fix all the missing Workspace parameters that were preventing the queries from running.\r\n>\r\n>**Version 1.0**\r\n>2020-30-01\r\n>- Initial version created by Antonio Canitano."
+      },
+      "conditionalVisibility": {
+        "parameterName": "Help",
+        "comparison": "isEqualTo",
+        "value": "ChangeLog"
+      },
+      "customWidth": "66",
+      "name": "WorkbookInfo",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 11,
+      "content": {
+        "version": "LinkItem/1.0",
+        "style": "tabs",
+        "links": [
+          {
+            "id": "e0b74e75-de8b-45bc-b573-630a083f7dba",
+            "cellValue": "selectedTab",
+            "linkTarget": "parameter",
+            "linkLabel": "Account Audit",
+            "subTarget": "Account",
+            "style": "link"
+          },
+          {
+            "id": "eb45504f-8183-4381-8637-dadd951eec54",
+            "cellValue": "selectedTab",
+            "linkTarget": "parameter",
+            "linkLabel": "Sql Server Audit",
+            "subTarget": "SQL",
+            "style": "link"
+          },
+          {
+            "id": "161b1ce8-8c60-42d7-8570-b08be40c3f1a",
+            "cellValue": "selectedTab",
+            "linkTarget": "parameter",
+            "linkLabel": "File System Audit",
+            "subTarget": "File",
+            "style": "link"
+          },
+          {
+            "id": "3f7d9915-dab1-4e8a-b59d-eba232a883b3",
+            "cellValue": "selectedTab",
+            "linkTarget": "parameter",
+            "linkLabel": "Query List",
+            "subTarget": "Query",
+            "style": "link"
+          }
+        ]
+      },
+      "name": "links - 64"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "# Get Started \r\n\r\nWelcome to the Security & Privacy workbook. This workbook is designed to to ease the reporting of account and group management as well as the activities about both failed and successful logons. It also provides you with the visibility of which computers and users have been attacked the most.\r\n\r\n## Requirements:\r\n\r\n- Collection of Security events through either [Azure Security Center](https://docs.microsoft.com/en-us/azure/security-center/security-center-partner-integration#manage-integrated-azure-security-solutions-and-other-data-sources) or [Azure Sentinel](https://docs.microsoft.com/en-us/azure/sentinel/connect-windows-security-events) connector.\r\n- Audit Policies configured according to the security requirements for your company with at least the following categories and subcategories enabled for **Failure** and **Success**:\r\n\t\r\n>| Category | Subcategory | Event(s) generated |\r\n>| -------- | ----------- | ------------------ |\r\n>| Account Management | Security Group Management | 4728, 4729, 4732, 4733 |\r\n>| Account Management | User Account Management | 4720, 4723, 4724, 4726, 4738 |\r\n>| Logon/Logoff | Logon | 4624, 4625 |\r\n\t"
+            },
+            "conditionalVisibility": {
+              "parameterName": "Help",
+              "comparison": "isEqualTo",
+              "value": "Yes"
+            },
+            "name": "GetStarted",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "title": "Account Management",
+              "expandable": true,
+              "items": [
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4720\r\n| summarize AggregatedValue = count(EventID) by bin(TimeGenerated,1d)",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Account Created - Daily aggregation",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "exportToExcelOptions": "all",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "visualization": "barchart"
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "accountCreated",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4720\r\n| project TimeGenerated, Account, SamAccountName, DisplayName\r\n| sort by TimeGenerated desc",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Account Created - Details",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "gridSettings": {
+                      "filter": true,
+                      "labelSettings": [
+                        {
+                          "columnId": "Account",
+                          "label": "Operated By"
+                        },
+                        {
+                          "columnId": "SamAccountName",
+                          "label": "SAM Account Name"
+                        },
+                        {
+                          "columnId": "DisplayName",
+                          "label": "Display Name"
+                        }
+                      ]
+                    }
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "accountCreatedSearch",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4724\r\n| summarize AggregatedValue = count() by TargetAccount\r\n| sort by AggregatedValue desc\r\n",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Password Change",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "visualization": "piechart"
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "pwdChange",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4724\r\n| summarize AggregatedValue = count() by TargetAccount\r\n| sort by AggregatedValue desc",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Password Change - Search",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "gridSettings": {
+                      "filter": true,
+                      "labelSettings": [
+                        {
+                          "columnId": "AggregatedValue",
+                          "label": "# of attempts"
+                        }
+                      ]
+                    }
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "pwdChangeDetails",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4740\r\n| summarize count(EventID) by Account\r\n| top 10 by count_EventID desc \r\n| render barchart",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Top 10 Account Locked",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ]
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "top10AccountLocked",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4740\r\n| summarize count(EventID) by Account\r\n| top 10 by count_EventID desc\r\n//| project Computer, EventID, Activity, Account, TimeGenerated, IpAddress",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Top 10 Account Locked - Search",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ]
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "top10AccountLockedSearch",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4740\r\n| summarize count(EventID) by IpAddress\r\n| order by count_EventID desc \r\n| top 10 by count_EventID \r\n| render barchart \r\n//| project Computer, EventID, Activity, Account, TimeGenerated, IpAddress",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Top 10 Computer with Account Locked",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ]
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "top10Computers",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4740\r\n| summarize count(EventID) by IpAddress\r\n| order by count_EventID desc \r\n| top 10 by count_EventID\r\n//| project Computer, EventID, Activity, Account, TimeGenerated, IpAddress",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Top 10 Computer with Account Locked - Search",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ]
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "top10ComputersSearch",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4738 \r\n| where Account !endswith \"$\" \r\n| parse EventData with * '\"UserAccountControl\">' UserAccountControl '<' * \r\n| parse EventData with * '\"TargetUserName\">' SubjectDomainName '<' * \r\n| parse EventData with * '\"TargetDomainName\">' SubjectUserName '<' * \r\n| where UserAccountControl contains \"%%2089\" or UserAccountControl contains \"%%2057\" \r\n| extend UserAccountControlDesc = iif(UserAccountControl contains \"%%2089\", \"Granted\", \"Removed\")\r\n| summarize dcount(TargetUserName) by UserAccountControlDesc",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "'Password never expire' attribute changes",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "visualization": "tiles",
+                    "tileSettings": {
+                      "showBorder": false,
+                      "titleContent": {
+                        "columnMatch": "UserAccountControlDesc",
+                        "formatter": 1
+                      },
+                      "leftContent": {
+                        "columnMatch": "dcount_TargetUserName",
+                        "formatter": 12,
+                        "formatOptions": {
+                          "palette": "auto"
+                        },
+                        "numberFormat": {
+                          "unit": 17,
+                          "options": {
+                            "maximumSignificantDigits": 3,
+                            "maximumFractionDigits": 2
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "pwdNeverExpire",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4738\r\n| where Account !endswith \"$\"\r\n| parse EventData with * '\"UserAccountControl\">' UserAccountControl '<' *\r\n| parse EventData with * '\"TargetUserName\">' SubjectDomainName '<' *\r\n| parse EventData with * '\"TargetDomainName\">' SubjectUserName '<' *\r\n| where UserAccountControl contains \"%%2089\" or UserAccountControl contains \"%%2057\"\r\n| project TimeGenerated, TargetAccount=strcat(TargetDomainName,\"\\\\\",TargetUserName), PasswordNeverExpire=iif(UserAccountControl contains \"%%2089\", \"Granted\", \"Removed\"), [\"By\"] = Account\r\n| sort by TimeGenerated desc ",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "'Password never expire' attribute changes",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ]
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "pwdNeverExpireDetails",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                }
+              ]
+            },
+            "name": "grp_AccountMgmt"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "title": "Account Logon",
+              "expandable": true,
+              "items": [
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID in (4624, 4625)\r\n| where AccountType has \"user\"\r\n| where not(Account contains_cs \"DWM\" or Account startswith_cs \"NT\")\r\n| summarize OK = count() by Activity\r\n| sort by OK desc\r\n| render piechart",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Count of logon events by status",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "chartSettings": {
+                      "yAxis": [
+                        "OK"
+                      ],
+                      "createOtherGroup": null,
+                      "seriesLabelSettings": [
+                        {
+                          "seriesName": "4625 - An account failed to log on.",
+                          "color": "redBright"
+                        },
+                        {
+                          "seriesName": "4624 - An account was successfully logged on.",
+                          "color": "blue"
+                        }
+                      ],
+                      "ySettings": {
+                        "unit": 17,
+                        "min": null,
+                        "max": null
+                      }
+                    }
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "userLogonByStatus",
+                  "styleSettings": {
+                    "padding": "20",
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID in (4624, 4625)\r\n| where AccountType =~ \"User\" and not(Account contains_cs \"DWM\" or Account startswith_cs \"NT\")\r\n| summarize SuccessfulLogons = countif(EventID==4624) , FailedLogons=countif(EventID==4625) by bin(TimeGenerated, 30m)\r\n",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Count of logons (Successful & Failed) by 30m",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ]
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "countOfLogonby30Mins",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID in (4624, 4625)\r\n| where AccountType has \"User\"\r\n| where not(Account contains_cs \"DWM\" or Account startswith_cs \"NT\")\r\n| summarize SuccessfulLogons = countif(EventID==4624) , FailedLogons=countif(EventID==4625) by bin(TimeGenerated, 30m)\r\n| render timechart",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Count of logon events by status - Trend",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "chartSettings": {
+                      "seriesLabelSettings": [
+                        {
+                          "seriesName": "FailedLogons",
+                          "color": "redBright"
+                        }
+                      ]
+                    }
+                  },
+                  "showPin": true,
+                  "name": "userLogonByStatusTrend",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4625\r\n| where AccountType has \"user\"\r\n| where not(Account contains_cs \"DWM\" or Account startswith_cs \"NT\")\r\n| summarize AggregatedValue = count() by Account\r\n| top 20 by AggregatedValue desc\r\n| render barchart",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Top 20 Failed Logons",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ]
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "top20FailedLogon",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4625\r\n| where AccountType has \"user\"\r\n| summarize AggregatedValue = count() by Account\r\n| sort by AggregatedValue desc\r\n| top 20 by AggregatedValue",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Failed Logon - Search",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "gridSettings": {
+                      "filter": true,
+                      "labelSettings": [
+                        {
+                          "columnId": "AggregatedValue",
+                          "label": "Count"
+                        }
+                      ]
+                    }
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "failedLogonSearch",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4625\r\n| where AccountType == \"User\" \r\n| distinct Account\r\n| sort by Account asc nulls first",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "List of common failing user names",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ]
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "commonFailingUserNames",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4625\r\n//| where Account !endswith \"$\"\r\n| where AccountType == \"User\" \r\n| summarize numOfAttack = count(EventID) by IpAddress\r\n| project IpAddress, numOfAttack, hint=\"(💡 Select the IpAddress for more details below.)\"\r\n| sort by numOfAttack desc nulls last",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Count of logon failures by Source IpAddress.",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "exportFieldName": "IpAddress",
+                    "exportParameterName": "IpAddress",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ]
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "logonFailureByIP",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4625\r\n| where AccountType == \"User\" \r\n| where IpAddress == (\"{IpAddress}\")\r\n| summarize failureCount=count(EventID) by Account\r\n| project Account, failureCount",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Failing user details for the IpAddress: {IpAddress}",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ]
+                  },
+                  "showPin": true,
+                  "name": "logonFailureByIPDetails",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4625\r\n| where AccountType has \"User\"\r\n| where not(Account contains_cs \"DWM\" or Account startswith_cs \"NT\")\r\n| summarize FailedLogons = count(EventID) by bin(TimeGenerated, 10m)",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Failed Logons Trend",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "visualization": "timechart",
+                    "gridSettings": {
+                      "filter": true
+                    }
+                  },
+                  "showPin": true,
+                  "name": "failedLogonTrend",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4625\r\n| where AccountType =~ \"User\"\r\n| where not(Account contains_cs \"DWM\" or Account startswith_cs \"NT\")\r\n| summarize FailedLogons = count(EventID) by Computer, bin(TimeGenerated, 10m)\r\n| sort by TimeGenerated desc\r\n| render timechart",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Failed logon by computer(s)",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ]
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "countOfFailedLogonByComputers",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4625\r\n| where AccountType =~ \"User\"\r\n| where not(Account contains_cs \"DWM\" or Account startswith_cs \"NT\")\r\n| summarize FailedLogons = count(EventID) by Computer, bin(TimeGenerated, 10m)",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Failed logon by computer(s) - Search",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "gridSettings": {
+                      "filter": true
+                    }
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "failedLogonByComputerSearch",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4624\r\n| where AccountType =~ \"User\" and not(Account contains_cs \"DWM\" or Account startswith_cs \"NT\")\r\n| summarize AggregatedValue = count() by Account\r\n| sort by AggregatedValue desc\r\n| render barchart",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Count of successful logon by user",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ]
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "successfulLogonByUser",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4624\r\n| where AccountType has \"User\"\r\n| where (Account !contains_cs \"DWM\" and Account !startswith_cs \"NT\")\r\n| summarize AggregatedValue = count() by Account\r\n| sort by AggregatedValue desc",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Count of successful logon by user - Search",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "gridSettings": {
+                      "filter": true,
+                      "labelSettings": [
+                        {
+                          "columnId": "AggregatedValue",
+                          "label": "# of logons"
+                        }
+                      ]
+                    }
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "successfulLogonByUserSearch",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4740\r\n| project Account,IpAddress, Computer, TimeGenerated\r\n| order by TimeGenerated desc",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Locked Accounts",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "tileSettings": {
+                      "showBorder": false
+                    }
+                  },
+                  "showPin": true,
+                  "name": "lockedAccount",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "let attackedUserList = SecurityEvent\r\n| where EventID == 4625\r\n| where AccountType == \"User\" \r\n| summarize lastFailure = arg_max(TimeGenerated, *) by Account\r\n| project lastFailure, Account;\r\nlet attackedUserListSuccess = SecurityEvent\r\n| where EventID == 4624\r\n| where AccountType == \"User\"\r\n| project success=TimeGenerated, Account;\r\nattackedUserListSuccess\r\n| join kind=leftouter (attackedUserList) on $left.Account == $right.Account\r\n| where success > lastFailure\r\n| summarize arg_min(success, *) by lastFailure\r\n| project Account, lastFailure, success",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Failed users that logged on succesfully",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ]
+                  },
+                  "showPin": true,
+                  "name": "failedUserThatLoggedOn",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4771\r\n| summarize AggregatedValue = count() by Computer\r\n| order by AggregatedValue",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Kerberos pre-authentications failed",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "visualization": "barchart",
+                    "chartSettings": {
+                      "yAxis": [
+                        "AggregatedValue"
+                      ],
+                      "group": "Computer",
+                      "createOtherGroup": null,
+                      "showLegend": true,
+                      "xSettings": {
+                        "unit": 17,
+                        "min": null,
+                        "max": null
+                      }
+                    }
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "berbPreAuthFailed",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4771\r\n| summarize AggregatedValue = count() by Computer\r\n| order by AggregatedValue",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Kerberos pre-authentications failed",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ]
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "kerbPreAuthFailed_2",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                }
+              ]
+            },
+            "name": "grp_LogonInfo"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "title": "Group Management",
+              "expandable": true,
+              "items": [
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID in (4728, 4729, 4732, 4733)\r\n| summarize AggregatedValue = count() by Activity\r\n| top 5 by AggregatedValue desc\r\n",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Group Membership Changes - Aggregated",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "visualization": "piechart"
+                  },
+                  "customWidth": "40",
+                  "showPin": true,
+                  "name": "groupMembershipChange",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID in (4728, 4729, 4732, 4733, 4756, 4757, 4751, 4752, 4761, 4762)\r\n| where SubjectAccount !contains \"$\"\r\n| extend accountName = split(split(MemberName,\",\")[0],\"=\")[1]\r\n| extend groupType = iif(Activity contains \"security-enabled\",\"Security\",\"Distribution\")\r\n| extend groupScope = iif(EventID in (4732, 4733, 4746, 4747), \"Local\", iif(EventID in (4728, 4729, 4751, 4752), \"Global\",iif(EventID in (4756, 4757, 4761, 4762), \"Universal\", \"Unknown\")))\r\n| project TimeGenerated, Activity, accountName, TargetAccount, groupType, groupScope, SubjectAccount\r\n| sort by TimeGenerated desc",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Group Membership Changes - Details",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "gridSettings": {
+                      "formatters": [
+                        {
+                          "columnMatch": "Activity",
+                          "formatter": 5
+                        }
+                      ],
+                      "filter": true,
+                      "hierarchySettings": {
+                        "treeType": 1,
+                        "groupBy": [
+                          "Activity"
+                        ],
+                        "expandTopLevel": true
+                      },
+                      "labelSettings": [
+                        {
+                          "columnId": "accountName",
+                          "label": "Member"
+                        },
+                        {
+                          "columnId": "TargetAccount",
+                          "label": "Group Name"
+                        },
+                        {
+                          "columnId": "groupType",
+                          "label": "Group Type"
+                        },
+                        {
+                          "columnId": "groupScope",
+                          "label": "Group Scope"
+                        },
+                        {
+                          "columnId": "SubjectAccount",
+                          "label": "Operated by"
+                        }
+                      ]
+                    }
+                  },
+                  "customWidth": "60",
+                  "showPin": true,
+                  "name": "groupMembershipChangeDetails",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID in (4728, 4729, 4732, 4733)\r\n| where AccountType =~ \"user\"\r\n| summarize OK = count() by Activity\r\n| sort by OK desc\r\n| render piechart",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Admin Group changes - Aggregated",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ]
+                  },
+                  "customWidth": "40",
+                  "showPin": true,
+                  "name": "adminGroupChange",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID in (4728, 4729, 4732, 4733, 4756, 4757, 4751, 4752, 4761, 4762)\r\n| extend groupType = iif(Activity contains \"security-enabled\",\"Security\",\"Distribution\")\r\n| extend groupScope = iif(EventID in (4732, 4733, 4746, 4747), \"Local\", iif(EventID in (4728, 4729, 4751, 4752), \"Global\",iif(EventID in (4756, 4757, 4761, 4762), \"Universal\", \"Unknown\")))\r\n| summarize AggregatedValue = count() by TargetAccount, groupType, groupScope\r\n| order by AggregatedValue desc",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Admin Group changes - count by group",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "gridSettings": {
+                      "filter": true,
+                      "sortBy": [
+                        {
+                          "itemKey": "AggregatedValue",
+                          "sortOrder": 2
+                        }
+                      ],
+                      "labelSettings": [
+                        {
+                          "columnId": "TargetAccount",
+                          "label": "Group Name"
+                        },
+                        {
+                          "columnId": "groupType",
+                          "label": "Group Type"
+                        },
+                        {
+                          "columnId": "groupScope",
+                          "label": "Group Scope"
+                        },
+                        {
+                          "columnId": "AggregatedValue",
+                          "label": "# of changes"
+                        }
+                      ]
+                    },
+                    "sortBy": [
+                      {
+                        "itemKey": "AggregatedValue",
+                        "sortOrder": 2
+                      }
+                    ]
+                  },
+                  "customWidth": "60",
+                  "showPin": true,
+                  "name": "adminGroupChangeCount",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                }
+              ]
+            },
+            "name": "grp_GroupMgmt"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "title": "Audit Log Management",
+              "expandable": true,
+              "items": [
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventSourceName == \"Microsoft-Windows-Eventlog\"\r\n| where EventID == 1102\r\n| summarize count() by Computer",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Count of Times Audit Log was Cleared",
+                    "noDataMessage": "No changes during the select time frame",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "visualization": "piechart",
+                    "gridSettings": {
+                      "filter": true,
+                      "labelSettings": [
+                        {
+                          "columnId": "count_",
+                          "label": "Count"
+                        }
+                      ]
+                    }
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "securityLogCleared",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventSourceName == \"Microsoft-Windows-Eventlog\"\r\n| where EventID == 1102\r\n| parse kind=relaxed EventData with * \"<SubjectUserName>\" userName \"</SubjectUserName>\" *\r\n| parse kind=relaxed EventData with * \"<SubjectDomainName>\" usrDomain \"</SubjectDomainName>\" *\r\n| project TimeGenerated, Computer, OperatedBy = strcat(usrDomain,\"\\\\\",userName), Activity",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Audit Log Clean Up - Details",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "gridSettings": {
+                      "formatters": [
+                        {
+                          "columnMatch": "Computer",
+                          "formatter": 7,
+                          "formatOptions": {
+                            "linkTarget": "GenericDetails",
+                            "linkIsContextBlade": true
+                          }
+                        },
+                        {
+                          "columnMatch": "OperatedBy",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "Activity",
+                          "formatter": 5
+                        }
+                      ],
+                      "filter": true
+                    }
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "securityEventCleanupDetails",
+                  "styleSettings": {
+                    "margin": "0",
+                    "showBorder": true
+                  }
+                }
+              ]
+            },
+            "name": "grp_SecurityEventCleanup"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "selectedTab",
+        "comparison": "isEqualTo",
+        "value": "Account"
+      },
+      "name": "grp_AccountAudit"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "# Get Started \r\n\r\nWelcome to the Security & Privacy workbook. This workbook is designed to to ease the reporting of account and activity management as well as the activities about both failed and successful logons on your SQL Server instances. \r\n\r\n## Requirements:\r\n\r\n- Collection of Security events through either [Azure Security Center](https://docs.microsoft.com/en-us/azure/security-center/security-center-partner-integration#manage-integrated-azure-security-solutions-and-other-data-sources) or [Azure Sentinel](https://docs.microsoft.com/en-us/azure/sentinel/connect-windows-security-events) connector.\r\n- [SQL Server Audit](https://docs.microsoft.com/en-us/sql/relational-databases/security/auditing/sql-server-audit-database-engine?view=sql-server-ver15) configured according to the security requirements for your company.\r\n- [Genereate Security Audits](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/generate-security-audits) right granted to the service account configured for SQL Server."
+            },
+            "conditionalVisibility": {
+              "parameterName": "Help",
+              "comparison": "isEqualTo",
+              "value": "Yes"
+            },
+            "name": "SqlGetStarted",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "title": "Logins",
+              "expandable": true,
+              "items": [
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 33205\r\n| project TimeGenerated, TimeCollected, Computer, EventSourceName, Channel, Level, EventID, EventData\r\n| parse kind=regex EventData with * \"event_time:\" OriginalEventTime \" sequence_number:\"\r\n| parse kind=regex EventData with * \"succeeded:\" ActionSucceeded \" is_column:\"\r\n| parse kind=regex EventData with * \"session_id:\" SessionId \" server_principal_id:\"\r\n| parse kind=regex EventData with * \"transaction_id:\" TransactionID \" class_type:\"\r\n| parse kind=regex EventData with * \"session_server_principal_name:\" SessionEstablishedBy \" server_principal_name:\"\r\n| parse kind=regex EventData with * \" server_principal_name:\" UserName \" server_principal_sid:\"\r\n| parse kind=regex EventData with * \"server_instance_name:\" SqlServer_Or_Instance \" database_name:\"\r\n| parse kind=regex EventData with * \"database_name:\" DatabaseName \" schema_name:\"\r\n| parse kind=regex EventData with * \"schema_name:\" SchemaName \" object_name:\"\r\n| parse kind=regex EventData with * \"object_name:\" Object \" statement:\"\r\n| parse kind=regex EventData with * \" statement:\" SqlStatement \" additional_information:\"\r\n| where SqlStatement has \"CREATE LOGIN\"\r\n| parse kind=relaxed SqlStatement with * \"LOGIN [\" loginName \"]\" *\r\n| parse kind=relaxed SqlStatement with * \"] FROM \" loginType \" WITH \" *\r\n| extend loginType = iif(isempty(loginType), \"SQL\", loginType)\r\n| project TimeGenerated, TimeCollected, Computer, SqlStatement, DatabaseName, loginName, loginType, UserName, SqlServer_Or_Instance",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "New logins",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "gridSettings": {
+                      "formatters": [
+                        {
+                          "columnMatch": "Computer",
+                          "formatter": 7,
+                          "formatOptions": {
+                            "linkTarget": "GenericDetails",
+                            "linkIsContextBlade": true
+                          }
+                        },
+                        {
+                          "columnMatch": "SqlStatement",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "DatabaseName",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "UserName",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "SqlServer_Or_Instance",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "Channel",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "Level",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "EventData",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "OriginalEventTime",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "ActionSucceeded",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "SessionId",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "TransactionID",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "SessionEstablishedBy",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "SchemaName",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "Object",
+                          "formatter": 5
+                        }
+                      ],
+                      "filter": true,
+                      "labelSettings": [
+                        {
+                          "columnId": "TimeGenerated"
+                        },
+                        {
+                          "columnId": "TimeCollected"
+                        },
+                        {
+                          "columnId": "Computer"
+                        },
+                        {
+                          "columnId": "SqlStatement",
+                          "label": "Sql Statement"
+                        },
+                        {
+                          "columnId": "DatabaseName",
+                          "label": "Database Name"
+                        },
+                        {
+                          "columnId": "loginName",
+                          "label": "Login Name"
+                        },
+                        {
+                          "columnId": "loginType",
+                          "label": "Login Type"
+                        },
+                        {
+                          "columnId": "UserName",
+                          "label": "Created By"
+                        },
+                        {
+                          "columnId": "SqlServer_Or_Instance",
+                          "label": "SQL Server /Instance"
+                        }
+                      ]
+                    }
+                  },
+                  "showPin": true,
+                  "name": "loginsCreated",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 33205\r\n| project TimeGenerated, TimeCollected, Computer, EventSourceName, Channel, Level, EventID, EventData\r\n| parse kind=regex EventData with * \"event_time:\" OriginalEventTime \" sequence_number:\"\r\n| parse kind=regex EventData with * \"succeeded:\" ActionSucceeded \" is_column:\"\r\n| parse kind=regex EventData with * \"session_id:\" SessionId \" server_principal_id:\"\r\n| parse kind=regex EventData with * \"transaction_id:\" TransactionID \" class_type:\"\r\n| parse kind=regex EventData with * \"session_server_principal_name:\" SessionEstablishedBy \" server_principal_name:\"\r\n| parse kind=regex EventData with * \" server_principal_name:\" UserName \" server_principal_sid:\"\r\n| parse kind=regex EventData with * \"server_instance_name:\" SqlServer_Or_Instance \" database_name:\"\r\n| parse kind=regex EventData with * \"database_name:\" DatabaseName \" schema_name:\"\r\n| parse kind=regex EventData with * \"schema_name:\" SchemaName \" object_name:\"\r\n| parse kind=regex EventData with * \"object_name:\" Object \" statement:\"\r\n| parse kind=regex EventData with * \" statement:\" SqlStatement \" additional_information:\"\r\n| where SqlStatement has \"DROP LOGIN\"\r\n| parse kind=relaxed SqlStatement with * \"LOGIN [\" loginName \"]\" *\r\n| project TimeGenerated, TimeCollected, Computer, SqlStatement, DatabaseName, loginName, UserName, SqlServer_Or_Instance",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Dropped logins",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "gridSettings": {
+                      "formatters": [
+                        {
+                          "columnMatch": "SqlStatement",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "DatabaseName",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "loginName",
+                          "formatter": 7,
+                          "formatOptions": {
+                            "linkTarget": "GenericDetails",
+                            "linkIsContextBlade": true
+                          }
+                        },
+                        {
+                          "columnMatch": "UserName",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "SqlServer_Or_Instance",
+                          "formatter": 5
+                        }
+                      ],
+                      "filter": true,
+                      "labelSettings": [
+                        {
+                          "columnId": "TimeGenerated"
+                        },
+                        {
+                          "columnId": "TimeCollected"
+                        },
+                        {
+                          "columnId": "Computer"
+                        },
+                        {
+                          "columnId": "SqlStatement",
+                          "label": "Sql Statement"
+                        },
+                        {
+                          "columnId": "DatabaseName",
+                          "label": "Database Name"
+                        },
+                        {
+                          "columnId": "loginName",
+                          "label": "Login Name"
+                        },
+                        {
+                          "columnId": "UserName",
+                          "label": "Dropped By"
+                        },
+                        {
+                          "columnId": "SqlServer_Or_Instance",
+                          "label": "Sql Server /Instance"
+                        }
+                      ]
+                    }
+                  },
+                  "showPin": true,
+                  "name": "loginsDropped"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 33205\r\n| project TimeGenerated, TimeCollected, Computer, EventSourceName, Channel, Level, EventID, EventData\r\n| parse kind=regex EventData with * \"event_time:\" OriginalEventTime \" sequence_number:\"\r\n| parse kind=regex EventData with * \"succeeded:\" ActionSucceeded \" is_column:\"\r\n| parse kind=regex EventData with * \"session_id:\" SessionId \" server_principal_id:\"\r\n| parse kind=regex EventData with * \"transaction_id:\" TransactionID \" class_type:\"\r\n| parse kind=regex EventData with * \"session_server_principal_name:\" SessionEstablishedBy \" server_principal_name:\"\r\n| parse kind=regex EventData with * \" server_principal_name:\" UserName \" server_principal_sid:\"\r\n| parse kind=regex EventData with * \"server_instance_name:\" SqlServer_Or_Instance \" database_name:\"\r\n| parse kind=regex EventData with * \"database_name:\" DatabaseName \" schema_name:\"\r\n| parse kind=regex EventData with * \"schema_name:\" SchemaName \" object_name:\"\r\n| parse kind=regex EventData with * \"object_name:\" Object \" statement:\"\r\n| parse kind=regex EventData with * \" statement:\" SqlStatement \" additional_information:\"\r\n| where SqlStatement contains \"login failed\"\r\n| project [\"Time Generated\"]=TimeGenerated, [\"Time Collected\"]=TimeCollected, [\"SQL Event Time [UTC only]\"]=OriginalEventTime, [\"User Name\"]=UserName, [\"On SqlServer / Instance\"]=SqlServer_Or_Instance, [\"From computer\"]=Computer, [\"Event Source\"]=EventSourceName, [\"Event Log Name\"]=Channel, EventID, [\"Audit Description\"]=iff(Level==16, \"Failure Audit\", \"Success Audit\"), [\"Event Level\"]=Level, [\"Sql Statement\"]=SqlStatement\r\n| sort by [\"Time Generated\"] desc",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Failed Logins",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "gridSettings": {
+                      "formatters": [
+                        {
+                          "columnMatch": "On SqlServer / Instance",
+                          "formatter": 7,
+                          "formatOptions": {
+                            "linkTarget": "GenericDetails",
+                            "linkIsContextBlade": true
+                          }
+                        },
+                        {
+                          "columnMatch": "From computer",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "Event Source",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "Event Log Name",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "EventID",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "Audit Description",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "Event Level",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "Sql Statement",
+                          "formatter": 5
+                        }
+                      ]
+                    }
+                  },
+                  "showPin": true,
+                  "name": "sqlFailedLoginsTotal",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 33205\r\n| project TimeGenerated, TimeCollected, Computer, EventSourceName, Channel, Level, EventID, EventData\r\n| parse kind=regex EventData with * \"event_time:\" OriginalEventTime \" sequence_number:\"\r\n| parse kind=regex EventData with * \"succeeded:\" ActionSucceeded \" is_column:\"\r\n| parse kind=regex EventData with * \"session_id:\" SessionId \" server_principal_id:\"\r\n| parse kind=regex EventData with * \"transaction_id:\" TransactionID \" class_type:\"\r\n| parse kind=regex EventData with * \"session_server_principal_name:\" SessionEstablishedBy \" server_principal_name:\"\r\n| parse kind=regex EventData with * \" server_principal_name:\" UserName \" server_principal_sid:\"\r\n| parse kind=regex EventData with * \"server_instance_name:\" SqlServer_Or_Instance \" database_name:\"\r\n| parse kind=regex EventData with * \"database_name:\" DatabaseName \" schema_name:\"\r\n| parse kind=regex EventData with * \"schema_name:\" SchemaName \" object_name:\"\r\n| parse kind=regex EventData with * \"object_name:\" Object \" statement:\"\r\n| parse kind=regex EventData with * \" statement:\" SqlStatement \" additional_information:\"\r\n| where SqlStatement contains \"login failed\"\r\n| summarize accesscount = count(SqlStatement) by SqlServer_Or_Instance",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Failed logins by SQL Server or Instance",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "visualization": "piechart"
+                  },
+                  "showPin": true,
+                  "name": "sqlFailedLoginsByServerOrInstance",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 33205\r\n| project TimeGenerated, TimeCollected, Computer, EventSourceName, Channel, Level, EventID, EventData\r\n| parse kind=regex EventData with * \"event_time:\" OriginalEventTime \" sequence_number:\"\r\n| parse kind=regex EventData with * \"succeeded:\" ActionSucceeded \" is_column:\"\r\n| parse kind=regex EventData with * \"session_id:\" SessionId \" server_principal_id:\"\r\n| parse kind=regex EventData with * \"transaction_id:\" TransactionID \" class_type:\"\r\n| parse kind=regex EventData with * \"session_server_principal_name:\" SessionEstablishedBy \" server_principal_name:\"\r\n| parse kind=regex EventData with * \" server_principal_name:\" UserName \" server_principal_sid:\"\r\n| parse kind=regex EventData with * \"server_instance_name:\" SqlServer_Or_Instance \" database_name:\"\r\n| parse kind=regex EventData with * \"database_name:\" DatabaseName \" schema_name:\"\r\n| parse kind=regex EventData with * \"schema_name:\" SchemaName \" object_name:\"\r\n| parse kind=regex EventData with * \"object_name:\" Object \" statement:\"\r\n| parse kind=regex EventData with * \" statement:\" SqlStatement \" additional_information:\"\r\n| where SqlStatement contains \"login successful\"\r\n| summarize accesscount = count(SqlStatement) by SqlServer_Or_Instance",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Successful logins by SQL Server or Instance",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "visualization": "piechart"
+                  },
+                  "showPin": true,
+                  "name": "sqlSuccesfullLoginsByServerOrInstance",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                }
+              ]
+            },
+            "name": "grp_SQL_Logins"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "title": "Database Activities (top 10 databases)",
+              "expandable": true,
+              "items": [
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 33205\r\n| project TimeGenerated, TimeCollected, Computer, EventSourceName, Channel, Level, EventID, EventData\r\n| parse kind=regex EventData with * \"event_time:\" OriginalEventTime \" sequence_number:\"\r\n| parse kind=regex EventData with * \"succeeded:\" ActionSucceeded \" is_column:\"\r\n| parse kind=regex EventData with * \"session_id:\" SessionId \" server_principal_id:\"\r\n| parse kind=regex EventData with * \"transaction_id:\" TransactionID \" class_type:\"\r\n| parse kind=regex EventData with * \"session_server_principal_name:\" SessionEstablishedBy \" server_principal_name:\"\r\n| parse kind=regex EventData with * \" server_principal_name:\" UserName \" server_principal_sid:\"\r\n| parse kind=regex EventData with * \"server_instance_name:\" SqlServer_Or_Instance \" database_name:\"\r\n| parse kind=regex EventData with * \"database_name:\" DatabaseName \" schema_name:\"\r\n| parse kind=regex EventData with * \"schema_name:\" SchemaName \" object_name:\"\r\n| parse kind=regex EventData with * \"object_name:\" Object \" statement:\"\r\n| parse kind=regex EventData with * \" statement:\" SqlStatement \" additional_information:\"\r\n| where UserName !contains \"$\"\r\n| where isnotempty(DatabaseName) and isnotnull(DatabaseName)\r\n| summarize activityCount = count() by DatabaseName\r\n| top 10 by activityCount\r\n",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Activities by database",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "visualization": "piechart"
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "activitiesByDatabase",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 33205\r\n| project TimeGenerated, TimeCollected, Computer, EventSourceName, Channel, Level, EventID, EventData\r\n| parse kind=regex EventData with * \"event_time:\" OriginalEventTime \" sequence_number:\"\r\n| parse kind=regex EventData with * \"succeeded:\" ActionSucceeded \" is_column:\"\r\n| parse kind=regex EventData with * \"session_id:\" SessionId \" server_principal_id:\"\r\n| parse kind=regex EventData with * \"transaction_id:\" TransactionID \" class_type:\"\r\n| parse kind=regex EventData with * \"session_server_principal_name:\" SessionEstablishedBy \" server_principal_name:\"\r\n| parse kind=regex EventData with * \" server_principal_name:\" UserName \" server_principal_sid:\"\r\n| parse kind=regex EventData with * \"server_instance_name:\" SqlServer_Or_Instance \" database_name:\"\r\n| parse kind=regex EventData with * \"database_name:\" DatabaseName \" schema_name:\"\r\n| parse kind=regex EventData with * \"schema_name:\" SchemaName \" object_name:\"\r\n| parse kind=regex EventData with * \"object_name:\" Object \" statement:\"\r\n| parse kind=regex EventData with * \" statement:\" SqlStatement \" additional_information:\"\r\n| where UserName !contains \"$\"\r\n| where isnotempty(DatabaseName) and isnotnull(DatabaseName)\r\n| summarize activityCount = count() by DatabaseName, bin(TimeGenerated,10m)\r\n| top 10 by activityCount\r\n",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Activities by database (trend)",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "visualization": "timechart"
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "activitiesByDatabaseTrend"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 33205\r\n| project TimeGenerated, TimeCollected, Computer, EventSourceName, Channel, Level, EventID, EventData\r\n| parse kind=regex EventData with * \"event_time:\" OriginalEventTime \" sequence_number:\"\r\n| parse kind=regex EventData with * \"succeeded:\" ActionSucceeded \" is_column:\"\r\n| parse kind=regex EventData with * \"session_id:\" SessionId \" server_principal_id:\"\r\n| parse kind=regex EventData with * \"transaction_id:\" TransactionID \" class_type:\"\r\n| parse kind=regex EventData with * \"session_server_principal_name:\" SessionEstablishedBy \" server_principal_name:\"\r\n| parse kind=regex EventData with * \" server_principal_name:\" UserName \" server_principal_sid:\"\r\n| parse kind=regex EventData with * \"server_instance_name:\" SqlServer_Or_Instance \" database_name:\"\r\n| parse kind=regex EventData with * \"database_name:\" DatabaseName \" schema_name:\"\r\n| parse kind=regex EventData with * \"schema_name:\" SchemaName \" object_name:\"\r\n| parse kind=regex EventData with * \"object_name:\" Object \" statement:\"\r\n| parse kind=regex EventData with * \" statement:\" SqlStatement \" additional_information:\"\r\n| where SqlStatement has \"CREATE DATABASE\"\r\n| parse kind=relaxed SqlStatement with * \"CREATE DATABASE [\" DatabaseName \"] \" *\r\n| project TimeGenerated, TimeCollected, Computer, EventSourceName, Channel, Level, EventID, EventData, OriginalEventTime, ActionSucceeded, SessionId, TransactionID, SessionEstablishedBy, UserName, SqlServer_Or_Instance, DatabaseName, SchemaName, SqlStatement",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "New databases",
+                    "timeContext": {
+                      "durationMs": 0
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "gridSettings": {
+                      "formatters": [
+                        {
+                          "columnMatch": "TimeCollected",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "EventSourceName",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "Channel",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "Level",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "EventID",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "EventData",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "ActionSucceeded",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "SessionId",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "TransactionID",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "SessionEstablishedBy",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "UserName",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "DatabaseName",
+                          "formatter": 7,
+                          "formatOptions": {
+                            "linkTarget": "GenericDetails",
+                            "linkIsContextBlade": true
+                          }
+                        },
+                        {
+                          "columnMatch": "SchemaName",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "SqlStatement",
+                          "formatter": 5
+                        }
+                      ],
+                      "filter": true,
+                      "labelSettings": [
+                        {
+                          "columnId": "TimeGenerated"
+                        },
+                        {
+                          "columnId": "TimeCollected"
+                        },
+                        {
+                          "columnId": "Computer"
+                        },
+                        {
+                          "columnId": "EventSourceName",
+                          "label": "Event Source"
+                        },
+                        {
+                          "columnId": "Channel",
+                          "label": "Event Log"
+                        },
+                        {
+                          "columnId": "Level"
+                        },
+                        {
+                          "columnId": "EventID",
+                          "label": "Event Id"
+                        },
+                        {
+                          "columnId": "EventData"
+                        },
+                        {
+                          "columnId": "OriginalEventTime",
+                          "label": "Original Event Time"
+                        },
+                        {
+                          "columnId": "ActionSucceeded"
+                        },
+                        {
+                          "columnId": "SessionId"
+                        },
+                        {
+                          "columnId": "TransactionID"
+                        },
+                        {
+                          "columnId": "SessionEstablishedBy"
+                        },
+                        {
+                          "columnId": "UserName",
+                          "label": "Operated By"
+                        },
+                        {
+                          "columnId": "SqlServer_Or_Instance",
+                          "label": "SQL Server / Instance"
+                        },
+                        {
+                          "columnId": "DatabaseName",
+                          "label": "Database Name"
+                        },
+                        {
+                          "columnId": "SchemaName"
+                        },
+                        {
+                          "columnId": "SqlStatement",
+                          "label": "Sql Statement"
+                        }
+                      ]
+                    }
+                  },
+                  "showPin": true,
+                  "name": "newDatabases",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 33205\r\n| project TimeGenerated, TimeCollected, Computer, EventSourceName, Channel, Level, EventID, EventData\r\n| parse kind=regex EventData with * \"event_time:\" OriginalEventTime \" sequence_number:\"\r\n| parse kind=regex EventData with * \"succeeded:\" ActionSucceeded \" is_column:\"\r\n| parse kind=regex EventData with * \"session_id:\" SessionId \" server_principal_id:\"\r\n| parse kind=regex EventData with * \"transaction_id:\" TransactionID \" class_type:\"\r\n| parse kind=regex EventData with * \"session_server_principal_name:\" SessionEstablishedBy \" server_principal_name:\"\r\n| parse kind=regex EventData with * \" server_principal_name:\" UserName \" server_principal_sid:\"\r\n| parse kind=regex EventData with * \"server_instance_name:\" SqlServer_Or_Instance \" database_name:\"\r\n| parse kind=regex EventData with * \"database_name:\" DatabaseName \" schema_name:\"\r\n| parse kind=regex EventData with * \"schema_name:\" SchemaName \" object_name:\"\r\n| parse kind=regex EventData with * \"object_name:\" Object \" statement:\"\r\n| parse kind=regex EventData with * \" statement:\" SqlStatement \" additional_information:\"\r\n| where SqlStatement has \"DROP DATABASE\"\r\n| project TimeGenerated, TimeCollected, Computer, EventSourceName, Channel, Level, EventID, EventData, OriginalEventTime, ActionSucceeded, SessionId, TransactionID, SessionEstablishedBy, UserName, SqlServer_Or_Instance, DatabaseName, SchemaName, SqlStatement",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Drop databases",
+                    "timeContext": {
+                      "durationMs": 0
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "gridSettings": {
+                      "formatters": [
+                        {
+                          "columnMatch": "TimeCollected",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "EventSourceName",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "Channel",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "Level",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "EventID",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "EventData",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "ActionSucceeded",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "SessionId",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "TransactionID",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "SessionEstablishedBy",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "UserName",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "DatabaseName",
+                          "formatter": 7,
+                          "formatOptions": {
+                            "linkTarget": "GenericDetails",
+                            "linkIsContextBlade": true
+                          }
+                        },
+                        {
+                          "columnMatch": "SchemaName",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "SqlStatement",
+                          "formatter": 5
+                        }
+                      ],
+                      "filter": true,
+                      "labelSettings": [
+                        {
+                          "columnId": "TimeGenerated"
+                        },
+                        {
+                          "columnId": "TimeCollected"
+                        },
+                        {
+                          "columnId": "Computer"
+                        },
+                        {
+                          "columnId": "EventSourceName"
+                        },
+                        {
+                          "columnId": "Channel"
+                        },
+                        {
+                          "columnId": "Level"
+                        },
+                        {
+                          "columnId": "EventID"
+                        },
+                        {
+                          "columnId": "EventData"
+                        },
+                        {
+                          "columnId": "OriginalEventTime",
+                          "label": "Original Event Time"
+                        },
+                        {
+                          "columnId": "ActionSucceeded"
+                        },
+                        {
+                          "columnId": "SessionId"
+                        },
+                        {
+                          "columnId": "TransactionID"
+                        },
+                        {
+                          "columnId": "SessionEstablishedBy"
+                        },
+                        {
+                          "columnId": "UserName"
+                        },
+                        {
+                          "columnId": "SqlServer_Or_Instance",
+                          "label": "SQL Server / Instance"
+                        },
+                        {
+                          "columnId": "DatabaseName",
+                          "label": "Database Name"
+                        },
+                        {
+                          "columnId": "SchemaName"
+                        },
+                        {
+                          "columnId": "SqlStatement"
+                        }
+                      ]
+                    }
+                  },
+                  "showPin": true,
+                  "name": "dropDatabases",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                }
+              ]
+            },
+            "name": "grp_SQL_DatabaseActivities"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "selectedTab",
+        "comparison": "isEqualTo",
+        "value": "SQL"
+      },
+      "name": "grp_SqlAudit"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "crossComponentResources": [
+                "{Workspace}"
+              ],
+              "parameters": [
+                {
+                  "id": "83f18af4-2093-4c77-8add-90e5a4a2e6bd",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "EventIDParam",
+                  "label": "Event ID",
+                  "type": 2,
+                  "isRequired": true,
+                  "multiSelect": true,
+                  "quote": "'",
+                  "delimiter": ",",
+                  "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID in (4656, 4658, 4660, 4663, 4664, 4670, 4985, 5051)\r\n| distinct EventID\r\n| order by EventID asc",
+                  "crossComponentResources": [
+                    "{Workspace}"
+                  ],
+                  "value": [
+                    "value::all"
+                  ],
+                  "typeSettings": {
+                    "additionalResourceOptions": [
+                      "value::all"
+                    ],
+                    "showDefault": false
+                  },
+                  "timeContext": {
+                    "durationMs": 2592000000
+                  },
+                  "timeContextFromParameter": "TimeRange",
+                  "queryType": 0,
+                  "resourceType": "microsoft.operationalinsights/workspaces"
+                },
+                {
+                  "id": "c086a847-e3b6-4eaf-9c8e-1adaa8cf2356",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "UserParam",
+                  "label": "Username",
+                  "type": 1,
+                  "isRequired": true,
+                  "value": ".*",
+                  "timeContext": {
+                    "durationMs": 2592000000
+                  },
+                  "timeContextFromParameter": "TimeRange"
+                }
+              ],
+              "style": "pills",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces"
+            },
+            "name": "parameters - 8"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "title": "File System Events",
+              "expandable": true,
+              "items": [
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent \r\n| where Computer in ({Servers})\r\n| where EventID in ({EventIDParam})\r\n| where AccountType == \"User\"\r\n//| where Account matches regex @\"(?i){UserParam}\"\r\n| summarize [\"Event Count\"] = count() by Computer\r\n| order by [\"Event Count\"] desc\r\n",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Event Count by Computer",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "visualization": "table",
+                    "gridSettings": {
+                      "formatters": [
+                        {
+                          "columnMatch": "Event Count",
+                          "formatter": 8,
+                          "formatOptions": {
+                            "showIcon": true
+                          }
+                        },
+                        {
+                          "columnMatch": "EventCount",
+                          "formatter": 8,
+                          "formatOptions": {
+                            "showIcon": true
+                          }
+                        }
+                      ],
+                      "filter": true
+                    }
+                  },
+                  "customWidth": "33",
+                  "showPin": true,
+                  "name": "eventsByComputer"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent \r\n| where Computer in ({Servers})\r\n| where AccountType == \"User\"\r\n| where EventID in ({EventIDParam})\r\n//| where Account matches regex @\"(?i){UserParam}\"\r\n| summarize [\"Event Count\"] = count() by Account\r\n| order by [\"Event Count\"] desc\r\n",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Event Count by Username",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "visualization": "table",
+                    "gridSettings": {
+                      "formatters": [
+                        {
+                          "columnMatch": "Event Count",
+                          "formatter": 8,
+                          "formatOptions": {
+                            "showIcon": true
+                          }
+                        },
+                        {
+                          "columnMatch": "EventCount",
+                          "formatter": 8,
+                          "formatOptions": {
+                            "showIcon": true
+                          }
+                        }
+                      ],
+                      "filter": true
+                    }
+                  },
+                  "customWidth": "34",
+                  "showPin": true,
+                  "name": "eventsByUser"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent \r\n| where Computer in ({Servers})\r\n| where AccountType == \"User\"\r\n| where EventID in ({EventIDParam})\r\n//| where Account matches regex @\"(?i){UserParam}\"\r\n| summarize [\"Event Count\"] = count() by Activity\r\n| order by [\"Event Count\"] desc\r\n",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Event Count by Event ID",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "visualization": "table",
+                    "gridSettings": {
+                      "formatters": [
+                        {
+                          "columnMatch": "Event Count",
+                          "formatter": 8,
+                          "formatOptions": {
+                            "showIcon": true
+                          }
+                        },
+                        {
+                          "columnMatch": "EventCount",
+                          "formatter": 8,
+                          "formatOptions": {
+                            "showIcon": true
+                          }
+                        }
+                      ],
+                      "filter": true
+                    }
+                  },
+                  "customWidth": "33",
+                  "showPin": true,
+                  "name": "eventsByEventId"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent \r\n| where Computer in ({Servers})\r\n| where EventID in ({EventIDParam})\r\n| where AccountType == \"User\"\r\n| where Account matches regex @\"(?i){UserParam}\"\r\n| project TimeGenerated, Activity, Computer, Account, AccountType, EventID, EventData, AccessList, AccessMask, AccessReason, AccountDomain, AccountExpires, AccountName",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "All File System Management Events.",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "visualization": "table",
+                    "gridSettings": {
+                      "formatters": [
+                        {
+                          "columnMatch": "Activity",
+                          "formatter": 1,
+                          "formatOptions": {
+                            "linkTarget": "GenericDetails",
+                            "linkIsContextBlade": true
+                          }
+                        },
+                        {
+                          "columnMatch": "EventID",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "EventData",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "AccessList",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "AccessMask",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "AccessReason",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "AccountDomain",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "AccountExpires",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "AccountName",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "TenantId",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "SourceSystem",
+                          "formatter": 5
+                        },
+                        {
+                          "columnMatch": "EventCount",
+                          "formatter": 8,
+                          "formatOptions": {
+                            "palette": "blue"
+                          }
+                        }
+                      ],
+                      "filter": true
+                    }
+                  },
+                  "showPin": true,
+                  "name": "allFileSystemEvents"
+                }
+              ]
+            },
+            "name": "grp_FileSystemEvents"
+          },
+          {
+            "type": 12,
+            "content": {
+              "version": "NotebookGroup/1.0",
+              "groupType": "editable",
+              "title": "File System Operations",
+              "expandable": true,
+              "items": [
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4663\r\n| where AccountType == \"User\"\r\n| where ObjectType == \"File\"\r\n| where AccessMask == \"0x2\" \r\n| summarize count() by ObjectName",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "File(s) created.",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ]
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "fileCreated",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4663\r\n| where AccountType == \"User\"\r\n| where ObjectType == \"File\"\r\n| where AccessMask == \"0x2\"\r\n| summarize count() by SubjectUserName\r\n",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Count of files created by User.",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ]
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "filesCreatedByUser",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4663\r\n| where AccountType == \"User\"\r\n| where ObjectType == \"File\" \r\n| where AccessMask == \"0x10000\" \r\n| summarize count() by ObjectName",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "File(s) deleted.",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ]
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "filesDeleted",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "SecurityEvent\r\n| where Computer in ({Servers})\r\n| where EventID == 4663\r\n| where AccountType == \"User\"\r\n| where ObjectType == \"File\"\r\n| where AccessMask == \"0x10000\"\r\n| summarize count() by SubjectUserName\r\n",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "Count of file(s) deleted by user.",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ],
+                    "sortBy": []
+                  },
+                  "customWidth": "50",
+                  "showPin": true,
+                  "name": "filesDeletedByUser",
+                  "styleSettings": {
+                    "showBorder": true
+                  }
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "File(s) moved",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ]
+                  },
+                  "showPin": true,
+                  "name": "filesMoved"
+                },
+                {
+                  "type": 3,
+                  "content": {
+                    "version": "KqlItem/1.0",
+                    "query": "",
+                    "size": 0,
+                    "showAnalytics": true,
+                    "title": "File(s) moved by user.",
+                    "timeContext": {
+                      "durationMs": 172800000
+                    },
+                    "timeContextFromParameter": "TimeRange",
+                    "queryType": 0,
+                    "resourceType": "microsoft.operationalinsights/workspaces",
+                    "crossComponentResources": [
+                      "{Workspace}"
+                    ]
+                  },
+                  "showPin": true,
+                  "name": "filesMovedByUser"
+                }
+              ]
+            },
+            "name": "grp_FileSystemOperations"
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "selectedTab",
+        "comparison": "isEqualTo",
+        "value": "File"
+      },
+      "name": "grp_FileAudit"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "items": [
+          {
+            "type": 1,
+            "content": {
+              "json": "### Logon Activity by Account\r\n\r\nSecurityEvent\r\n| where EventID in (4624, 4625)\r\n| where AccountType =~ \"User\"\r\n| summarize LogonCount = count() by Account\r\n\r\n"
+            },
+            "customWidth": "50",
+            "name": "text - 53",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 1,
+            "content": {
+              "json": "### Logoff Activity by Account\r\n\r\nSecurityEvent\r\n| where EventID == 4634\r\n| summarize AggregatedValue = count() by Account"
+            },
+            "customWidth": "50",
+            "name": "text - 53",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 1,
+            "content": {
+              "json": "### Change Password Attempts\r\n\r\nSecurityEvent \r\n| where EventID in (4723, 4724 )\r\n| summarize AggregatedValue = count() by TargetAccount"
+            },
+            "customWidth": "50",
+            "name": "text - 54",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 1,
+            "content": {
+              "json": "### Reset Password Attemps by Non-Owners\r\n\r\nSecurityEvent \r\n| where TimeGenerated > ago(30d)\r\n| where EventID == 4724 \r\n| sort by TimeGenerated desc \r\n| project TimeGenerated, Computer, TargetAccount, SubjectAccount"
+            },
+            "customWidth": "50",
+            "name": "text - 55",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 1,
+            "content": {
+              "json": "### User Account Created\r\n\r\nSecurityEvent\r\n| where EventID == 4720\r\n| sort by TimeGenerated desc\r\n| project TimeGenerated, AccountType, SubjectAccount, TargetAccount, DisplayName"
+            },
+            "customWidth": "50",
+            "name": "text - 56",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 1,
+            "content": {
+              "json": "### User Account Deleted\r\n\r\nSecurityEvent | where EventID == 4726 | sort by TimeGenerated desc | project TimeGenerated, AccountType, SubjectAccount, TargetAccount, DisplayName"
+            },
+            "customWidth": "50",
+            "name": "text - 57",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 1,
+            "content": {
+              "json": "### Domain and Built-in Administrators Membership Added\r\nSecurityEvent \r\n| where EventID in (4728, 4732)\r\n| where (TargetSid endswith_cs \\\"-512\\\" or TargetSid == \\\"S-1-5-32-544\\\") \r\n| sort by TimeGenerated desc \r\n| project TimeGenerated, SubjectAccount, MemberName, TargetAccount"
+            },
+            "customWidth": "50",
+            "name": "text - 58",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 1,
+            "content": {
+              "json": "### Domain and Built-in Administrators Membership Removed\r\n\r\nSecurityEvent \r\n| where EventID in (4729, 4733)\r\n| where (TargetSid endswith_cs \\\"-512\\\" or TargetSid == \\\"S-1-5-32-544\\\")\r\n| sort by TimeGenerated desc \r\n| project TimeGenerated, SubjectAccount, MemberName, TargetAccount"
+            },
+            "customWidth": "50",
+            "name": "text - 59",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 1,
+            "content": {
+              "json": "### Group Membership Changes\r\n\r\nSecurityEvent \r\n| where TimeGenerated > ago(30d) | where EventID in (4728, 4729, 4732, 4733)\r\n| sort by TimeGenerated desc \r\n| project TimeGenerated, Activity, SubjectAccount, TargetUserName, MemberName, MemberSid"
+            },
+            "customWidth": "50",
+            "name": "text - 60",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 1,
+            "content": {
+              "json": "### Group Membership Added\r\n\r\nSecurityEvent \r\n| where TimeGenerated > ago(30d) \r\n| where EventID in (4728, 4732)\r\n| sort by TimeGenerated desc \r\n| project TimeGenerated, Activity, SubjectAccount, TargetUserName, MemberName, MemberSid"
+            },
+            "customWidth": "50",
+            "name": "text - 61",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 1,
+            "content": {
+              "json": "### Group Membership Removed\r\n\r\nSecurityEvent \r\n| where TimeGenerated > ago(30d) \r\n| where EventID in (4729, 4733)\r\n| sort by TimeGenerated desc \r\n| project TimeGenerated, Activity, SubjectAccount, TargetUserName, MemberName, MemberSid"
+            },
+            "customWidth": "50",
+            "name": "text - 62",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 1,
+            "content": {
+              "json": "### Audit Log was Cleared\r\nSecurityEvent \r\n| where EventID == 1102 \r\n| sort by TimeGenerated desc"
+            },
+            "customWidth": "50",
+            "name": "text - 63",
+            "styleSettings": {
+              "showBorder": true
+            }
+          }
+        ]
+      },
+      "conditionalVisibility": {
+        "parameterName": "selectedTab",
+        "comparison": "isEqualTo",
+        "value": "Query"
+      },
+      "name": "grp_QueryList"
+    }
+  ],
+  "fallbackResourceIds": [
+    "/subscriptions/c1209b8f-c331-442e-a5bd-52ed4570f5fd/resourceGroups/ACOPSMGR16/providers/Microsoft.OperationalInsights/workspaces/AC-Private-Cloud"
+  ],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}

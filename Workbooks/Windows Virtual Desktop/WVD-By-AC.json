@@ -1,0 +1,784 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 1,
+      "content": {
+        "json": "# Windows Virtual Desktop"
+      },
+      "name": "text - 1"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "## Version 1.0\r\nnote: change the version number accordingly\r\n\r\n***Author***\r\n- Created by Antonio Canitano\r\n\r\n***History***\r\n\r\n\r\n- 20200420 - Version 1.0 - Created by Antonio Canitano."
+      },
+      "conditionalVisibility": {
+        "parameterName": "_",
+        "comparison": "isEqualTo",
+        "value": "_"
+      },
+      "name": "text - 48"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "crossComponentResources": [
+          "{Subscription}"
+        ],
+        "parameters": [
+          {
+            "id": "ff24505c-2099-43a4-a8a3-3456bed78eb5",
+            "version": "KqlParameterItem/1.0",
+            "name": "TimeRange",
+            "type": 4,
+            "isRequired": true,
+            "value": {
+              "durationMs": 86400000
+            },
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 3600000
+                },
+                {
+                  "durationMs": 14400000
+                },
+                {
+                  "durationMs": 43200000
+                },
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 172800000
+                },
+                {
+                  "durationMs": 259200000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 1209600000
+                },
+                {
+                  "durationMs": 2419200000
+                },
+                {
+                  "durationMs": 2592000000
+                },
+                {
+                  "durationMs": 5184000000
+                },
+                {
+                  "durationMs": 7776000000
+                }
+              ]
+            },
+            "resourceType": "microsoft.insights/components"
+          },
+          {
+            "id": "bfe50469-7469-4c4d-a33e-0edbb43546c4",
+            "version": "KqlParameterItem/1.0",
+            "name": "Subscription",
+            "type": 6,
+            "isRequired": true,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "value": [
+              "value::all"
+            ],
+            "typeSettings": {
+              "additionalResourceOptions": [
+                "value::all"
+              ],
+              "includeAll": true
+            },
+            "resourceType": "microsoft.insights/components"
+          },
+          {
+            "id": "fb861784-4609-49f2-9f58-427fcc547677",
+            "version": "KqlParameterItem/1.0",
+            "name": "Workspace",
+            "label": "",
+            "type": 5,
+            "isRequired": true,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "query": "where type =~ 'microsoft.operationalinsights/workspaces'\r\n| summarize by id, name\r\n| order by name asc",
+            "crossComponentResources": [
+              "{Subscription}"
+            ],
+            "value": [
+              "value::all"
+            ],
+            "typeSettings": {
+              "resourceTypeFilter": {
+                "microsoft.operationalinsights/workspaces": true
+              },
+              "additionalResourceOptions": [
+                "value::all"
+              ]
+            },
+            "timeContext": {
+              "durationMs": 0
+            },
+            "timeContextFromParameter": "TimeRange",
+            "queryType": 1,
+            "resourceType": "microsoft.resourcegraph/resources"
+          }
+        ],
+        "style": "pills",
+        "queryType": 1,
+        "resourceType": "microsoft.resourcegraph/resources"
+      },
+      "name": "parameters - 1"
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "### RDS Session"
+      },
+      "name": "text - 10"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "ITPC_CTX_Session_CL\r\n| summarize AggregatedValue = dcount(SessionHash_s) by ConnectionState_s\r\n| sort by AggregatedValue desc",
+        "size": 0,
+        "showAnalytics": true,
+        "title": "UNIQUE SESSIONS STATE",
+        "noDataMessage": "No changes during the select time frame",
+        "timeContext": {
+          "durationMs": 0
+        },
+        "timeContextFromParameter": "TimeRange",
+        "exportToExcelOptions": "all",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "piechart"
+      },
+      "customWidth": "50",
+      "showPin": true,
+      "name": "query - Active Sessions",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "ITPC_CTX_PerfData_CL\r\n| where Category == \"RemoteFX Network\" and Counter_s == \"Total Sent Rate\" and Instance_s != \"_Server Total\"\r\n| summarize AggregatedValue = avg(value_d) by Worker_s, bin(TimeGenerated, 1h)\r\n| sort by TimeGenerated desc\r\n\r\n",
+        "size": 0,
+        "showAnalytics": true,
+        "title": "SESSION OUTPUT BANDWIDTH - Average Bandwidth per Worker BIT/S",
+        "noDataMessage": "No changes during the select time frame",
+        "timeContext": {
+          "durationMs": 0
+        },
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "timechart",
+        "graphSettings": {
+          "type": 0,
+          "topContent": {
+            "columnMatch": "Computer",
+            "formatter": 1,
+            "formatOptions": {
+              "showIcon": true
+            }
+          },
+          "centerContent": {
+            "columnMatch": "count_",
+            "formatter": 1,
+            "formatOptions": {
+              "showIcon": true
+            },
+            "numberFormat": {
+              "unit": 17,
+              "options": {
+                "maximumSignificantDigits": 3,
+                "maximumFractionDigits": 2
+              }
+            }
+          },
+          "nodeIdField": "Computer",
+          "nodeSize": null,
+          "staticNodeSize": 100,
+          "colorSettings": null,
+          "hivesMargin": 5
+        },
+        "mapSettings": {
+          "locInfo": "LatLong",
+          "sizeSettings": "count_",
+          "sizeAggregation": "Sum",
+          "defaultSize": 0,
+          "legendMetric": "count_",
+          "legendAggregation": "Sum",
+          "itemColorSettings": {
+            "nodeColorField": "count_",
+            "colorAggregation": "Sum",
+            "type": "heatmap",
+            "heatmapPalette": "greenRed"
+          }
+        }
+      },
+      "customWidth": "50",
+      "showPin": true,
+      "name": "SESSION OUTPUT BANDWIDTH",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "ITPC_CTX_PerfData_CL\r\n| where Category == \"RemoteFX Network\" and Counter_s == \"Total Received Rate\" and Instance_s != \"_Server Total\"\r\n| summarize AggregatedValue = avg(value_d) by Worker_s, bin(TimeGenerated, 1h)\r\n| sort by TimeGenerated desc",
+        "size": 0,
+        "showAnalytics": true,
+        "title": "SESSION INPUT BANDWIDTH Average Bandwidth per Worker BIT/S",
+        "noDataMessage": "No changes during the select time frame",
+        "timeContext": {
+          "durationMs": 0
+        },
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "timechart"
+      },
+      "customWidth": "50",
+      "showPin": true,
+      "name": "query - Total Sessions",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "ITPC_CTX_PerfData_CL\r\n| where Category == \"RemoteFX Network\" and Counter_s == \"Current TCP Bandwidth\" and Instance_s != \"_Server Total\"\r\n| summarize AggregatedValue = avg(value_d) by Worker_s, bin(TimeGenerated, 1h)\r\n| sort by TimeGenerated desc",
+        "size": 0,
+        "showAnalytics": true,
+        "title": "SESSION OUTPUT TCP LINE SPEED Average Output Line Speed per Worker BIT/S",
+        "noDataMessage": "No changes during the select time frame",
+        "timeContext": {
+          "durationMs": 0
+        },
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "timechart"
+      },
+      "customWidth": "50",
+      "showPin": true,
+      "name": "query - Total Sessions - Copy",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "### PROCESSES"
+      },
+      "name": "text - 24"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "ITPC_CTX_Process_CL\r\n| summarize AggregatedValue = dcount(NameInSession_s) by Worker_s\r\n| sort by Worker_s asc\r\n",
+        "size": 0,
+        "showAnalytics": true,
+        "title": "Processes by Worker",
+        "timeContext": {
+          "durationMs": 0
+        },
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "barchart",
+        "tileSettings": {
+          "showBorder": false,
+          "titleContent": {
+            "columnMatch": "Worker_s",
+            "formatter": 1
+          },
+          "leftContent": {
+            "columnMatch": "AggregatedValue",
+            "formatter": 12,
+            "formatOptions": {
+              "palette": "auto"
+            },
+            "numberFormat": {
+              "unit": 17,
+              "options": {
+                "maximumSignificantDigits": 3,
+                "maximumFractionDigits": 2
+              }
+            }
+          }
+        },
+        "graphSettings": {
+          "type": 0,
+          "topContent": {
+            "columnMatch": "Worker_s",
+            "formatter": 1,
+            "formatOptions": {
+              "showIcon": true
+            }
+          },
+          "centerContent": {
+            "columnMatch": "AggregatedValue",
+            "formatter": 1,
+            "formatOptions": {
+              "showIcon": true
+            },
+            "numberFormat": {
+              "unit": 17,
+              "options": {
+                "maximumSignificantDigits": 3,
+                "maximumFractionDigits": 2
+              }
+            }
+          },
+          "nodeIdField": "Worker_s",
+          "nodeSize": null,
+          "staticNodeSize": 100,
+          "colorSettings": null,
+          "hivesMargin": 5
+        },
+        "mapSettings": {
+          "locInfo": "LatLong",
+          "sizeSettings": "AggregatedValue",
+          "sizeAggregation": "Sum",
+          "defaultSize": 0,
+          "legendMetric": "AggregatedValue",
+          "legendAggregation": "Sum",
+          "itemColorSettings": {
+            "nodeColorField": "AggregatedValue",
+            "colorAggregation": "Sum",
+            "type": "heatmap",
+            "heatmapPalette": "greenRed"
+          }
+        }
+      },
+      "customWidth": "50",
+      "name": "query - 8",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "ITPC_CTX_Process_CL \r\n| where Name_s != \"System Idle Process\" \r\n| summarize AggregatedValue = avg(PercentProcessorTime_d) by Name_s, bin(TimeGenerated, 1h) \r\n| sort by TimeGenerated desc",
+        "size": 0,
+        "title": "PROCESS CPU CONSUMPTION (AVG) - Overall by Process Name % CPU",
+        "timeContext": {
+          "durationMs": 0
+        },
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "piechart"
+      },
+      "customWidth": "50",
+      "name": "query - 9",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "ITPC_CTX_Process_CL\r\n| where Name_s != \"System Idle Process\"\r\n| summarize AggregatedValue = avg(WorkingSet_d) by Name_s, bin(TimeGenerated, 1h)\r\n| sort by TimeGenerated desc",
+        "size": 0,
+        "showAnalytics": true,
+        "title": "PROCESS MEMORY CONSUMPTION PHY (AVG)",
+        "timeContext": {
+          "durationMs": 0
+        },
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "linechart"
+      },
+      "customWidth": "50",
+      "name": "query - 10",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "ITPC_CTX_Process_CL\r\n| where Name_s != \"System Idle Process\"\r\n| summarize AggregatedValue = avg(WorkingSet_d) by Name_s, bin(TimeGenerated, 1h)\r\n| sort by TimeGenerated desc",
+        "size": 0,
+        "showAnalytics": true,
+        "title": "PROCESS CPU CONSUMPTION (MAX)",
+        "timeContext": {
+          "durationMs": 0
+        },
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ]
+      },
+      "customWidth": "50",
+      "name": "query - 19",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 1,
+      "content": {
+        "json": "# Diagnostics Events"
+      },
+      "name": "text - 12"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "WVDActivityV1_CL \r\n| where Type_s == \"Connection\" \r\n| join kind=leftouter (WVDErrorV1_CL | summarize Errors = makelist(pack('Time', Time_t, 'Code', ErrorCode_s , 'CodeSymbolic', ErrorCodeSymbolic_s, 'Message', ErrorMessage_s, 'ReportedBy', ReportedBy_s , 'Internal', ErrorInternal_s )) by ActivityId_g) on $left.Id_g  == $right.ActivityId_g   \r\n| join  kind=leftouter (WVDCheckpointV1_CL | summarize Checkpoints = makelist(pack('Time', Time_t, 'ReportedBy', ReportedBy_s, 'Name', Name_s, 'Parameters', Parameters_s) ) by ActivityId_g) on $left.Id_g  == $right.ActivityId_g  \r\n| where Outcome_s == 'Success'\r\n| project UserName_s, Outcome_s, Status_s\r\n| summarize count() by UserName_s, Outcome_s",
+        "size": 0,
+        "showAnalytics": true,
+        "title": "Connection Activities Initiated by users ",
+        "timeContext": {
+          "durationMs": 604800000
+        },
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "visualization": "piechart"
+      },
+      "customWidth": "50",
+      "name": "query - 11",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "WVDActivityV1_CL \r\n| where Type_s == \"Management\" \r\n| join kind=leftouter (WVDErrorV1_CL | summarize Errors = makelist(pack('Time', Time_t, 'Code', ErrorCode_s , 'CodeSymbolic', ErrorCodeSymbolic_s, 'Message', ErrorMessage_s, 'ReportedBy', ReportedBy_s , 'Internal', ErrorInternal_s )) by ActivityId_g) on $left.Id_g  == $right.ActivityId_g   \r\n| join  kind=leftouter (WVDCheckpointV1_CL | summarize Checkpoints = makelist(pack('Time', Time_t, 'ReportedBy', ReportedBy_s, 'Name', Name_s, 'Parameters', Parameters_s) ) by ActivityId_g) on $left.Id_g  == $right.ActivityId_g  \r\n|project-away ActivityId_g, ActivityId_g1 \r\n",
+        "size": 0,
+        "showAnalytics": true,
+        "title": "Management Activities by Admins on Tenants",
+        "timeContext": {
+          "durationMs": 604800000
+        },
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ]
+      },
+      "customWidth": "50",
+      "name": "query - 13",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "SigninLogs\r\n| where TimeGenerated > ago(14d)\r\n| where AppDisplayName contains \"Windows Virtual Desktop\"  \r\n| summarize count() by Identity\r\n| sort by count_ desc ",
+        "size": 0,
+        "showAnalytics": true,
+        "title": "Azure AD number of WVD sign ins per user",
+        "timeContext": {
+          "durationMs": 0
+        },
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ]
+      },
+      "customWidth": "50",
+      "name": "query - 15"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "WVDActivityV1_CL \r\n| where Type_s == \"Connection\" and Outcome_s == 'Success' and Status_s == 'Completed'\r\n| distinct StartTime_t, EndTime_t, UserName_s, SessionHostName_s, SessionHostPoolName_s\r\n| extend Seconds = datetime_diff('second', EndTime_t, StartTime_t) \r\n| extend Hours = Seconds / 3600.00 \r\n| summarize sum(Hours) by UserName_s",
+        "size": 0,
+        "showAnalytics": true,
+        "title": "Usage by Users",
+        "timeContext": {
+          "durationMs": 0
+        },
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "gridSettings": {
+          "formatters": [
+            {
+              "columnMatch": "sum_Hours",
+              "formatter": 18,
+              "formatOptions": {
+                "thresholdsOptions": "colors",
+                "thresholdsGrid": [
+                  {
+                    "operator": "Default",
+                    "thresholdValue": null,
+                    "representation": null,
+                    "text": "{0}{1}"
+                  }
+                ],
+                "aggregation": "Max"
+              }
+            }
+          ],
+          "sortBy": [
+            {
+              "itemKey": "$gen_thresholds_sum_Hours_1",
+              "sortOrder": 2
+            }
+          ]
+        },
+        "sortBy": [
+          {
+            "itemKey": "$gen_thresholds_sum_Hours_1",
+            "sortOrder": 2
+          }
+        ]
+      },
+      "customWidth": "50",
+      "name": "query - 18",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "WVDActivityV1_CL\r\n| where Type_s == \"Connection\"\r\n| distinct StartTime_t, EndTime_t, UserName_s, SessionHostName_s, SessionHostPoolName_s \r\n| extend Seconds = datetime_diff('second', EndTime_t, StartTime_t) | extend Hours = Seconds / 3600.00 \r\n| summarize sum(Hours) by SessionHostName_s",
+        "size": 0,
+        "title": "Usage over time",
+        "timeContext": {
+          "durationMs": 0
+        },
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "gridSettings": {
+          "formatters": [
+            {
+              "columnMatch": "sum_Hours",
+              "formatter": 18,
+              "formatOptions": {
+                "thresholdsOptions": "colors",
+                "thresholdsGrid": [
+                  {
+                    "operator": "Default",
+                    "thresholdValue": null,
+                    "representation": null,
+                    "text": "{0}{1}"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "customWidth": "50",
+      "name": "query - 22",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "WVDActivityV1_CL \r\n| where Type_s == \"Connection\"\r\n| distinct StartTime_t, EndTime_t, UserName_s, SessionHostName_s, SessionHostPoolName_s \r\n| extend Seconds = datetime_diff('second', EndTime_t, StartTime_t) \r\n| extend Hours = Seconds / 3600.00 \r\n| summarize sum(Hours) by SessionHostName_s",
+        "size": 0,
+        "title": "Host pool usage",
+        "timeContext": {
+          "durationMs": 0
+        },
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "gridSettings": {
+          "formatters": [
+            {
+              "columnMatch": "sum_Hours",
+              "formatter": 18,
+              "formatOptions": {
+                "thresholdsOptions": "colors",
+                "thresholdsGrid": [
+                  {
+                    "operator": "Default",
+                    "thresholdValue": null,
+                    "representation": null,
+                    "text": "{0}{1}"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "customWidth": "50",
+      "name": "query - 23",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "WVDActivityV1_CL \r\n| summarize Sessions=dcount(UserName_s)",
+        "size": 0,
+        "title": "Unique users",
+        "timeContext": {
+          "durationMs": 0
+        },
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ]
+      },
+      "customWidth": "50",
+      "name": "Unique users",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "WVDActivityV1_CL \r\n| summarize HostPools=dcount(SessionHostPoolName_s)",
+        "size": 0,
+        "title": "Count of Host pools",
+        "timeContext": {
+          "durationMs": 0
+        },
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ]
+      },
+      "customWidth": "50",
+      "name": "query - 20",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "SigninLogs\r\n  | where AppDisplayName contains \"Windows Virtual Desktop\"\r\n  | where ResultType in ( \"50126\" , \"50020\", \"50034\", \"50074\", \"50076\", \"50131\")\r\n  | extend OS = DeviceDetail.operatingSystem, Browser = DeviceDetail.browser\r\n  | extend StatusCode = tostring(Status.errorCode), StatusDetails = tostring(Status.additionalDetails)\r\n  | extend State = tostring(LocationDetails.state), City = tostring(LocationDetails.city)\r\n  | summarize StartTimeUtc = min(TimeGenerated), EndTimeUtc = max(TimeGenerated), IPAddresses = makeset(IPAddress), DistinctIPCount = dcount(IPAddress), \r\n  makeset(OS), makeset(Browser), makeset(City), AttemptCount = count() \r\n  by UserDisplayName, UserPrincipalName, AppDisplayName, ResultType, ResultDescription, StatusCode, StatusDetails, Location, State\r\n  | extend timestamp = StartTimeUtc, AccountCustomEntity = UserPrincipalName\r\n  | sort by AttemptCount",
+        "size": 0,
+        "showAnalytics": true,
+        "title": "Access attempts WVD by : unauthorized user, bad password, incorrect MFA, user account does not exist.",
+        "timeContext": {
+          "durationMs": 0
+        },
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces",
+        "crossComponentResources": [
+          "{Workspace}"
+        ],
+        "gridSettings": {
+          "filter": true
+        }
+      },
+      "name": "query - 19",
+      "styleSettings": {
+        "showBorder": true
+      }
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "WVDActivityV1_CL \r\n| where Type_s == \"Connection\" \r\n| join kind=leftouter ( \r\n    WVDErrorV1_CL \r\n    | summarize Errors = makelist(pack('Time', Time_t, 'Code', ErrorCode_s , 'CodeSymbolic', ErrorCodeSymbolic_s, 'Message', ErrorMessage_s, 'ReportedBy', ReportedBy_s , 'Internal', ErrorInternal_s )) by ActivityId_g \r\n    ) on $left.Id_g  == $right.ActivityId_g   \r\n| join  kind=leftouter (  \r\n    WVDCheckpointV1_CL \r\n    | summarize Checkpoints = makelist(pack('Time', Time_t, 'ReportedBy', ReportedBy_s, 'Name', Name_s, 'Parameters', Parameters_s) ) by ActivityId_g \r\n    ) on $left.Id_g  == $right.ActivityId_g  \r\n|project-away ActivityId_g, ActivityId_g1 ",
+        "size": 0,
+        "title": "Connection Activities initiated by users with supported  RD Clients",
+        "timeContext": {
+          "durationMs": 0
+        },
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "query - 20"
+    },
+    {
+      "type": 3,
+      "content": {
+        "version": "KqlItem/1.0",
+        "query": "WVDActivityV1_CL \r\n| where Type_s == \"Management\" \r\n| join kind=leftouter ( \r\n    WVDErrorV1_CL \r\n    | summarize Errors = makelist(pack('Time', Time_t, 'Code', ErrorCode_s , 'CodeSymbolic', ErrorCodeSymbolic_s, 'Message', ErrorMessage_s, 'ReportedBy', ReportedBy_s , 'Internal', ErrorInternal_s )) by ActivityId_g \r\n    ) on $left.Id_g  == $right.ActivityId_g   \r\n| join  kind=leftouter (  \r\n    WVDCheckpointV1_CL \r\n    | summarize Checkpoints = makelist(pack('Time', Time_t, 'ReportedBy', ReportedBy_s, 'Name', Name_s, 'Parameters', Parameters_s) ) by ActivityId_g \r\n    ) on $left.Id_g  == $right.ActivityId_g  \r\n|project-away ActivityId_g, ActivityId_g1",
+        "size": 0,
+        "title": "Management Activities by Admins on Tenants",
+        "timeContext": {
+          "durationMs": 0
+        },
+        "timeContextFromParameter": "TimeRange",
+        "queryType": 0,
+        "resourceType": "microsoft.operationalinsights/workspaces"
+      },
+      "name": "query - 21"
+    }
+  ],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}
